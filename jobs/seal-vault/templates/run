@@ -1,0 +1,14 @@
+#!/bin/bash
+
+set -e
+#don't print your token to stdout
+#set -x
+
+VAULT_INSTANCES='<%= p("vault_instances") %>'
+VAULT_TOKEN='<%= p("vault_token") %>'
+
+collection=($(echo $VAULT_INSTANCES | tr -d '[],' | tr -d '"' ))
+for i in "${collection[@]}"
+do
+	curl --silent --header "X-Vault-Token: $VAULT_TOKEN" --request PUT http://$i:8200/v1/sys/seal
+done

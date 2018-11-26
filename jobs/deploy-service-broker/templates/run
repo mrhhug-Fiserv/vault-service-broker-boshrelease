@@ -1,0 +1,44 @@
+#!/bin/bash
+
+set -e 
+#set -x
+
+CF_API='<%= p("cf_api_address") %>'
+CF_USER='<%= p("cf_user") %>'
+CF_PASS='<%= p("cf_pass") %>'
+ORG='<%= p("org") %>'
+SPACE='<%= p("space") %>'
+VAULT_ADDR='<%= p("vault_addr") %>'
+VAULT_TOKEN='<%= p("vault_token") %>'
+
+AUTH_USERNAME='<%= p("auth_username", "admin") %>'
+AUTH_PASSWORD='<%= p("auth_password", "MichaelIsMetal") %>'
+APP_NAME='<%= p("app_name", "bosh-deployed-hashicorp-vault-service-broker") %>'
+SERVICE_BROKER_SERVICE_NAME='<%= p("service_name", "vault-broker") %>'
+BUILDPACK='<%= p("buildpack", "go_buildpack") %>'
+
+CF_CLI="/var/vcap/packages/cf/cf"
+
+#skip ssl should probobly be a var
+$CF_CLI login --skip-ssl-validation -a "$CF_API" -u "$CF_USER" -p "$CF_PASS" -o "$ORG" -s "$SPACE"
+
+#deploy app with no-start
+$CF_CLI push $APP_NAME --no-start -f /var/vcap/packages/service-broker/manifest.yml -p /var/vcap/packages/service-broker/applicationtodeploy.zip -b $BUILDPACK 
+
+#configure environmental variables
+$CF_CLI set-env $APP_NAME VAULT_ADDR "$VAULT_ADDR"
+$CF_CLI set-env $APP_NAME VAULT_TOKEN "$VAULT_TOKEN"
+$CF_CLI set-env $APP_NAME SECURITY_USER_NAME "$AUTH_USERNAME"
+$CF_CLI set-env $APP_NAME SECURITY_USER_PASSWORD "$AUTH_PASSWORD"
+$CF_CLI start $APP_NAME
+
+BROKER_URL=$($CF_CLI app $APP_NAME | grep -E -w 'urls:|routes:' | awk '{print $2}')
+
+#print some fun stuff to stdout
+curl --silent --user "${AUTH_USERNAME}:${AUTH_PASSWORD}" "https://${BROKER_URL}/v2/catalog"
+
+#create service broker
+$CF_CLI create-service-broker $SERVICE_BROKER_SERVICE_NAME "${AUTH_USERNAME}" "${AUTH_PASSWORD}" "https://${BROKER_URL}"
+
+#open it up to all #This magic string is in the broker
+$CF_CLI enable-service-access "hashicorp-vault"

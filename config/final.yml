@@ -1,0 +1,6 @@
+---
+blobstore:
+  provider: local
+  options:
+    blobstore_path: /tmp/fiserv-vault-service-broker
+final_name: fiserv-hashicorp-vault-service-broker

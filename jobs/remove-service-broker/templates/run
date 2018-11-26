@@ -1,0 +1,22 @@
+#!/bin/bash
+
+set -e 
+#set -x
+
+CF_API='<%= p("cf_api_address") %>'
+CF_USER='<%= p("cf_user") %>'
+CF_PASS='<%= p("cf_pass") %>'
+ORG='<%= p("org") %>'
+SPACE='<%= p("space") %>'
+
+APP_NAME='<%= p("app_name", "bosh-deployed-hashicorp-vault-service-broker") %>'
+SERVICE_BROKER_SERVICE_NAME='<%= p("service_name", "vault-broker") %>'
+
+CF_CLI='/var/vcap/packages/cf/cf'
+
+#skip ssl should probobly be a var
+$CF_CLI login --skip-ssl-validation -a "$CF_API" -u "$CF_USER" -p "$CF_PASS" -o "$ORG" -s "$SPACE"
+
+#remove the service proker
+$CF_CLI delete-service-broker $SERVICE_BROKER_SERVICE_NAME -f
+$CF_CLI delete $APP_NAME -f

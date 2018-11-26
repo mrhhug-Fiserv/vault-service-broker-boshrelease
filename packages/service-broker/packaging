@@ -1,0 +1,6 @@
+set -e
+set -x
+
+cp vault-service-broker/manifest.yml ${BOSH_INSTALL_TARGET}/
+cd vault-service-broker
+zip --recurse-paths ${BOSH_INSTALL_TARGET}/applicationtodeploy.zip *

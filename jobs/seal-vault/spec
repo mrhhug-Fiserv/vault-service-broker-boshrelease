@@ -1,0 +1,14 @@
+---
+name: seal-vault
+
+templates:
+  run: bin/run
+
+packages: []
+
+properties:
+  vault_instances:
+    description: Array of IPs of the vault instances
+  vault_token:
+    description: Vault root token
+

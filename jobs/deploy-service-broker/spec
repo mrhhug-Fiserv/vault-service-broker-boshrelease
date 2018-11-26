@@ -1,0 +1,37 @@
+---
+name: deploy-service-broker
+
+templates:
+  run: bin/run
+
+packages:
+- cf
+- service-broker 
+
+properties:
+  org:
+    description: The org to deploy service broker
+  space:
+    description: The space to deploy service broker
+  cf_api_address:
+    description: api endpoint of the foundation
+  cf_user:
+    description: user push to the org and space in the targeted foundation
+  cf_pass:
+    description: password for cf_user
+  vault_addr:
+    description: location of the vault server
+  vault_token:
+    description: token for vault
+  auth_username:
+    default: admin
+    description: user for service broker
+  auth_password:
+    default: MichaelIsMetal
+    description: password for service broker
+  app_name:
+    default: bosh-deployed-hashicorp-vault-service-broker
+    description: Name of the service broker app
+  buildpack:
+    default: go_buildpack
+    description: Name of the buildpack

@@ -1,0 +1,5 @@
+set -e
+
+mv cf ${BOSH_INSTALL_TARGET}/cf
+chmod +x ${BOSH_INSTALL_TARGET}/cf
+

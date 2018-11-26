@@ -1,0 +1,28 @@
+#!/bin/bash
+
+#can't do this because of the way i grep
+#set -e
+
+#these two lines are kind of a mess, tr to remove [] and "
+VAULT_INSTANCES=($(echo '<%= p("vault_instances") %>' | tr -d '[],' | tr -d '"' ))
+UNSEAL_KEYS=($(echo ' <%= p("unseal_keys") %>' | tr -d '[],' | tr -d '"' ))
+#assume all vaults are sealed unstil the exit code is the number of unsealed vaults
+sealed_vaults=${#VAULT_INSTANCES[@]}
+
+#try to quit fast
+unsealed_vaults=0
+
+#iterate
+for i in "${VAULT_INSTANCES[@]}"
+do
+	for j in "${UNSEAL_KEYS[@]}"
+	do
+		curl --silent --request PUT --data '{"key": "'$j'"}' http://$i:8200/v1/sys/unseal | grep '"sealed":false'
+		if [ $? -eq 0 ];
+		then
+			((sealed_vaults=sealed_vaults-1))
+			break
+		fi
+	done
+done
+exit $sealed_vaults

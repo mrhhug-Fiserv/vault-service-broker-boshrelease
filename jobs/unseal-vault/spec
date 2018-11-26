@@ -1,0 +1,13 @@
+---
+name: unseal-vault
+
+templates:
+  run: bin/run
+
+packages: []
+
+properties:
+  vault_instances:
+    description: Array of IPs of the vault instances
+  unseal_keys:
+    description: Array of unseal keys. You may provide more than nessesary. Script will stop when unsealed 
